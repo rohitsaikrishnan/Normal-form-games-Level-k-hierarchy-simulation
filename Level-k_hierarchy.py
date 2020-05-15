@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 
 
-np.random.seed(3)
+np.random.seed(5)
 def normal_form_game_payoff():
 
     num=np.random.randint(1,11)
@@ -20,7 +20,7 @@ def normal_form_game_payoff():
 
 
 
-def level_k_probabilities_2(k,player,lamda2=0.1):
+def level_k_probabilities_2(k,player,lamda2=0.56):
     if k==0:
         return (0.5,0.5)
     sum_1 = np.exp(lamda2 * (level_k_probabilities_1(k - 1, (player + 1) % 2,lamda=0.05)[0] * normal_form_game_player[0][0][player%2] +
@@ -31,7 +31,7 @@ def level_k_probabilities_2(k,player,lamda2=0.1):
     prob2=sum_2/(sum_1+sum_2)
     return (prob1,prob2)
 
-def level_k_probabilities_1(k,player,lamda=0.1):
+def level_k_probabilities_1(k,player,lamda=0.36):
     if k==0:
         return (0.5,0.5)
     sum_1 = np.exp(lamda * (level_k_probabilities_1(k - 1, (player + 1) % 2)[0] * normal_form_game_player[0][0][player%2] +
@@ -154,49 +154,85 @@ def level_2_payoff_2(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2):
 #    print(payoff)
 #    print(payoff2)
 print poisson_distribution()
-for i in range(20):
-    normal_form_game_player=normal_form_game_payoff()
+def game_simulation(lamda):
     lk_probabilities_0 = level_k_probabilities_1(0, 0)
     lk_probabilities_1 = level_k_probabilities_1(1, 0)
-    lk_probabilities_2 = level_k_probabilities_2(2, 0)
+    lk_probabilities_2 = level_k_probabilities_2(2, 0, lamda)
     probabilistic_distribution = poisson_distribution()
-    print '\n\n'
+    print ('\n\n')
     print ('Game', i)
-    print  '\n'
-    print 'Payoff Matrix\n'
-    print normal_form_game_player[0]
-    print normal_form_game_player[1]
-    print 'Player 1'
-    print 'Level-0 -->', lk_probabilities_0
-    print 'Level-1 -->', lk_probabilities_1
-    print 'Level-2 -->',lk_probabilities_2
+    print ('\n')
+    print ('Payoff Matrix\n')
+    print (normal_form_game_player[0])
+    print (normal_form_game_player[1])
+    print ('Player 1')
+    print ('Level-0 -->', lk_probabilities_0)
+    print ('Level-1 -->', lk_probabilities_1)
+    print ('Level-2 -->',lk_probabilities_2)
     payoff_10 = level_0_payoff(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_11 = level_1_payoff(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_12 = level_2_payoff(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_1 = [payoff_10, payoff_11, payoff_12]
-    print 'Avg. Payoff -->',payoff_1
+    print ('Avg. Payoff -->',payoff_1)
     lk_probabilities_0 = level_k_probabilities_1(0, 1)
     lk_probabilities_1 = level_k_probabilities_1(1, 1)
-    lk_probabilities_2 = level_k_probabilities_2(2, 1)
-    print 'Player 2'
-    print 'Level-0 -->', lk_probabilities_0
-    print 'Level-1 -->', lk_probabilities_1
-    print 'Level-2 -->', lk_probabilities_2
+    lk_probabilities_2 = level_k_probabilities_2(2, 1,lamda)
+    print ('Player 2')
+    print ('Level-0 -->', lk_probabilities_0)
+    print ('Level-1 -->', lk_probabilities_1)
+    print ('Level-2 -->', lk_probabilities_2)
     payoff_20 = level_0_payoff_2(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_21 = level_1_payoff_2(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_22 = level_2_payoff_2(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_2 = [payoff_20, payoff_21, payoff_22]
-    print 'Avg. Payoff -->',payoff_2
-    level = ['0', '1', '2']
-    plt.plot(level, payoff_1, color='r', label='Player-1')
-    plt.plot(level, payoff_2, color='blue', label='Player-2')
-    plt.legend()
-    plt.title('Quantal Level-k')
-    plt.grid()
-    plt.xlabel('Cognitive Levels')
-    plt.ylabel('Avg. Payoff')
-    plt.axis('tight')
-    plt.show()
+    print ('Avg. Payoff -->',payoff_2)
+    return payoff_1, payoff_2
+
+
+
+level0_p1 = []
+level1_p1 = []
+level2_p1 = []
+level0_p2 = []
+level1_p2 = []
+level2_p2 = []
+for j in range(10):
+    lamda = (j+1)*0.1
+    winners1 = []
+    winners2 = []
+    for i in range(20):
+        normal_form_game_player = normal_form_game_payoff()
+        payoff1, payoff2 = game_simulation(lamda)
+        max1 = max(payoff1)
+        max2 = max(payoff2)
+        winners1.append(payoff1.index(max1))
+        winners2.append(payoff2.index(max2))
+    level0_p1.append(winners1.count(0)*5)
+    level1_p1.append(winners1.count(1)*5)
+    level2_p1.append(winners1.count(2)*5)
+    level0_p2.append(winners2.count(0)*5)
+    level1_p2.append(winners2.count(1)*5)
+    level2_p2.append(winners2.count(2)*5)
+
+ind = np.arange(10)
+print(ind)
+width = 0.8/3
+plt.bar(ind, level0_p1, width, label='level-0')
+plt.bar(ind + width, level1_p1, width,
+        label='level-1')
+plt.bar(ind+2*width, level2_p1, width, label='level-2')
+
+plt.xlabel(r'$\lambda_2$ parameter')
+plt.ylabel('Win%')
+plt.title(r'Win% for different values of $\lambda_2$ (Player 1)')
+plt.grid()
+plt.xticks(ind + width, ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9','1.0'))
+plt.text(2, 88, r'$\lambda_1$=0.36')
+plt.legend(loc='upper right')
+plt.show()
+
+
+
 
 
 
