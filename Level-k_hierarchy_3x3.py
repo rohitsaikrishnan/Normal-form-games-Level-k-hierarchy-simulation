@@ -228,8 +228,8 @@ def level_2_payoff_2(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2):
 #    print(payoff2)
 print poisson_distribution()
 def game_simulation(lamda):
-    lk_probabilities_0 = level_k_probabilities_1(0, 0)
-    lk_probabilities_1 = level_k_probabilities_1(1, 0)
+    lk_probabilities_0 = level_k_probabilities_1(0, 0,lamda)
+    lk_probabilities_1 = level_k_probabilities_1(1, 0,lamda)
     lk_probabilities_2 = level_k_probabilities_2(2, 0,lamda)
     probabilistic_distribution = poisson_distribution()
     print ('\n\n')
@@ -248,8 +248,8 @@ def game_simulation(lamda):
     payoff_12 = level_2_payoff(lk_probabilities_0, lk_probabilities_1, lk_probabilities_2)
     payoff_1 = [payoff_10, payoff_11, payoff_12]
     print ('Avg. Payoff -->',payoff_1)
-    lk_probabilities_0 = level_k_probabilities_1(0, 1)
-    lk_probabilities_1 = level_k_probabilities_1(1, 1)
+    lk_probabilities_0 = level_k_probabilities_1(0, 1,lamda)
+    lk_probabilities_1 = level_k_probabilities_1(1, 1,lamda)
     lk_probabilities_2 = level_k_probabilities_2(2, 1,lamda)
     print ('Player 2')
     print ('Level-0 -->', lk_probabilities_0)
@@ -296,12 +296,12 @@ plt.bar(ind + width, level1_p2, width,
         label='level-1')
 plt.bar(ind+2*width, level2_p2, width, label='level-2')
 
-plt.xlabel(r'$\lambda_2$ parameter')
+plt.xlabel(r'$\lambda_1$ & $\lambda_2$ parameter')
 plt.ylabel('Win%')
-plt.title(r'Win% for different values of $\lambda_2$ (Player 2)')
+plt.title(r'Win% for different values of $\lambda_1$ & $\lambda_2$ (Player 2)')
 plt.grid()
 plt.xticks(ind + width, ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9','1.0'))
-plt.text(4.8, 92, r'$\lambda_1$=0.36')
+plt.text(2.8, 60, r'$\lambda_1$ = $\lambda_2$')
 plt.legend(loc='upper right')
 plt.show()
 
