@@ -302,6 +302,7 @@ for j in range(10):
     tie_p2.append(winners2.count(999)*5)
 
 ind = np.arange(10)
+#add tie
 print(ind)
 width = 0.8/4
 plt.bar(ind, tie_p1, width, label='tie',color='k')
