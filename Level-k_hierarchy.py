@@ -20,6 +20,7 @@ def normal_form_game_payoff():
 
 
 
+
 def level_k_probabilities_2(k,player,lamda=0.56, lamda2=0.05):
     if k==0:
         return  (0.5,0.5)
@@ -210,9 +211,11 @@ def game_simulation(lamda):
 level0_p1 = []
 level1_p1 = []
 level2_p1 = []
+tie_p1 = []
 level0_p2 = []
 level1_p2 = []
 level2_p2 = []
+tie_p2 = []
 for j in range(10):
     lamda = (j+1)*0.1
     winners1 = []
@@ -222,29 +225,39 @@ for j in range(10):
         payoff1, payoff2 = game_simulation(lamda)
         max1 = max(payoff1)
         max2 = max(payoff2)
-        winners1.append(payoff1.index(max1))
-        winners2.append(payoff2.index(max2))
+        payoff_1set=set(payoff1)
+        payoff_2set=set(payoff2)
+        if len(payoff_1set)==3:
+            winners1.append(payoff1.index(max1))
+        else:
+            winners1.append(999)
+        if len(payoff_2set)==3:
+            winners2.append(payoff2.index(max2))
+        else:
+            winners2.append(999)
     level0_p1.append(winners1.count(0)*5)
     level1_p1.append(winners1.count(1)*5)
     level2_p1.append(winners1.count(2)*5)
+    tie_p1.append(winners1.count(999)*5)
     level0_p2.append(winners2.count(0)*5)
     level1_p2.append(winners2.count(1)*5)
     level2_p2.append(winners2.count(2)*5)
+    tie_p2.append((winners2.count(999)*5))
 
 ind = np.arange(10)
 print(ind)
-width = 0.8/3
-plt.bar(ind, level0_p1, width, label='level-0')
-plt.bar(ind + width, level1_p1, width,
-        label='level-1')
-plt.bar(ind+2*width, level2_p1, width, label='level-2')
+width = 0.8/4
+plt.bar(ind, tie_p1, width, label='tie',color='k')
+plt.bar(ind+width, level0_p1, width, label='level-0',color='green')
+plt.bar(ind + 2*width, level1_p1, width,label='level-1',color='purple')
+plt.bar(ind+3*width, level2_p1, width, label='level-2',color='r')
 
 plt.xlabel(r'$\lambda_2$ parameter')
 plt.ylabel('Win%')
 plt.title(r'Win% for different values of $\lambda_2$ (Player 1)')
 plt.grid()
 plt.xticks(ind + width, ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9','1.0'))
-plt.text(2, 88, r'$\lambda_1$=0.36')
+plt.text(4, 55, r'$\lambda_1$=$\lambda_2$')
 plt.legend(loc='upper right')
 plt.show()
 
