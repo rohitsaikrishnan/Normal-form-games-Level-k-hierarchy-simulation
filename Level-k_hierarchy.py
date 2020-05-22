@@ -243,7 +243,7 @@ for j in range(10):
     level1_p2.append(winners2.count(1)*5)
     level2_p2.append(winners2.count(2)*5)
     tie_p2.append((winners2.count(999)*5))
-
+#add tie
 ind = np.arange(10)
 print(ind)
 width = 0.8/4
