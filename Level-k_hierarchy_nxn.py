@@ -98,7 +98,7 @@ def poisson_distribution(lamda=1.5, no_of_levels=2):
     for i in range(no_of_levels+1):
         probabilistic_distribution.append(np.power(lamda, i)*np.exp(-lamda)/float(math.factorial(i)))
     probabilistic_distribution = [i/sum(probabilistic_distribution) for i in probabilistic_distribution]
-    return [0,1,0]
+    return probabilistic_distribution
 def level_0_payoff(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2,lk_probabilities_p):
     n=len(normal_form_game_player)
     player_probabilities = lk_probabilities_p
@@ -302,7 +302,6 @@ def main():
     print
     len(normal_form_game_payoff(3))
 if __name__ == "__main__":
-    n = int(input("enter game size:"))
     level0_p1 = []
     level1_p1 = []
     level2_p1 = []
@@ -312,9 +311,10 @@ if __name__ == "__main__":
     level2_p2 = []
     tie_p2 = []
     for j in range(10):
-        lamda = (j + 1) * 0.1
+        lamda = 0.5
         winners1 = []
         winners2 = []
+        n=j + 1
         for i in range(20):
             normal_form_game_player = normal_form_game_payoff(n)
             payoff1, payoff2 = game_simulation(lamda)
@@ -348,11 +348,11 @@ if __name__ == "__main__":
     plt.bar(ind + 2 * width, level1_p1, width, label='level-1', color='purple')
     plt.bar(ind + 3 * width, level2_p1, width, label='level-2', color='r')
 
-    plt.xlabel(r'$\lambda_1$ & $\lambda_2$ parameter')
+    plt.xlabel(r'Game size (nxn)')
     plt.ylabel('Win%')
-    plt.title(r'Win% for different values of $\lambda_1$ & $\lambda_2$ (Player 1)')
+    plt.title(r'Win% for different game size(nxn) (Player 1)')
     plt.grid()
-    plt.xticks(ind + width, ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'))
+    plt.xticks(ind + width, ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10'))
     plt.text(2.8, 78, r'$\lambda_1$ = $\lambda_2$')
     plt.legend(loc='upper right')
     plt.show()
