@@ -275,12 +275,15 @@ level2_p2 = []
 tie_p2=[]
 
 normal_form_game_player = []
+normal_form_game_player_list = []
+for i in range(20):
+    normal_form_game_player_list.append(normal_form_game_payoff())
 def lamda1_vs_lamda2(lamda):
     lamda2_values = []
     for i in range(20):
         lamda2 = 0
         global normal_form_game_player
-        normal_form_game_player = normal_form_game_payoff()
+        normal_form_game_player = normal_form_game_player_list[i]
         while 1:
             payoff1, payoff2 = game_simulation(lamda, lamda2)
             max1 = max(payoff1)
