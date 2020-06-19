@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-
-
+import collections
+import functools
 np.random.seed(60)
 def normal_form_game_payoff(n):
     normal_form_game = []
@@ -11,7 +11,7 @@ def normal_form_game_payoff(n):
         for j in range(n):
             temp2 = []
             for k in range(2):
-                num = np.random.randint(1,11)
+                num = np.random.randint(1,101)
                 temp2.append(num)
             temp1.append(temp2)
         normal_form_game.append(temp1)
@@ -328,9 +328,9 @@ if __name__ == "__main__":
             payoff_2set = set(payoff2)
             if len(payoff_1set) == 3:
                 if payoff1.index(max1) == 1:
-                    index_1=level_k_probabilities_1(1, 0, lamda).index(max(level_k_probabilities_1(1, 0, lamda)))
-                    index_2=level_k_probabilities_2(2,0,lamda,lamda).index(max(level_k_probabilities_2(2,0,lamda,lamda)))
-                    if level_k_probabilities_1(1,0,lamda).index(max(level_k_probabilities_1(1,0,lamda))) != level_k_probabilities_2(2,0,lamda,lamda).index(max(level_k_probabilities_2(2,0,lamda,lamda))):
+                    index_1=np.argsort(np.array(level_k_probabilities_1(1, 0, lamda)))
+                    index_2=np.argsort(np.array(level_k_probabilities_2(2,0,lamda,lamda)))
+                    if functools.reduce(lambda i, j : i and j, map(lambda m, k: m == k, index_1, index_2), True):
                         winner_level1 = winner_level1 + 1
 
                 winners1.append(payoff1.index(max1))
@@ -342,7 +342,7 @@ if __name__ == "__main__":
                 winners2.append(999)
 
         if j!=0:
-            winner_level1_proportion.append((float(winner_level1)/winners1.count(1))*100)
+            winner_level1_proportion.append(((1-float(winner_level1)/winners1.count(1)))*100)
         level0_p1.append(winners1.count(0))
         level1_p1.append(winners1.count(1))
         level2_p1.append(winners1.count(2))
