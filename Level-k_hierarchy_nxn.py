@@ -11,7 +11,7 @@ def normal_form_game_payoff(n):
         for j in range(n):
             temp2 = []
             for k in range(2):
-                num = np.random.randint(1,11)
+                num = np.random.rand()
                 temp2.append(num)
             temp1.append(temp2)
         normal_form_game.append(temp1)
@@ -98,7 +98,7 @@ def poisson_distribution(lamda=1.5, no_of_levels=2):
     for i in range(no_of_levels+1):
         probabilistic_distribution.append(np.power(lamda, i)*np.exp(-lamda)/float(math.factorial(i)))
     probabilistic_distribution = [i/sum(probabilistic_distribution) for i in probabilistic_distribution]
-    return probabilistic_distribution
+    return [0,0,1]
 def level_0_payoff(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2,lk_probabilities_p):
     n=len(normal_form_game_player)
     player_probabilities = lk_probabilities_p
@@ -252,25 +252,16 @@ def main():
     level1_p2 = []
     level2_p2 = []
     tie_p2 = []
-    for j in range(10):
-        lamda = (j + 1) * 0.1
+    for j in range(1):
+        lamda = 50
         winners1 = []
         winners2 = []
-        for i in range(20):
+        for i in range(100):
             normal_form_game_player = normal_form_game_payoff(n)
             payoff1, payoff2 = game_simulation(lamda)
-            max1 = max(payoff1)
-            max2 = max(payoff2)
-            payoff_1set = set(payoff1)
-            payoff_2set = set(payoff2)
-            if len(payoff_1set) == 3:
-                winners1.append(payoff1.index(max1))
-            else:
-                winners1.append(999)
-            if len(payoff_2set) == 3:
-                winners2.append(payoff2.index(max2))
-            else:
-                winners2.append(999)
+            winners1.append(payoff1[0])
+            winners2.append(payoff1[2])
+
         level0_p1.append(winners1.count(0) * 5)
         level1_p1.append(winners1.count(1) * 5)
         level2_p1.append(winners1.count(2) * 5)
@@ -279,15 +270,16 @@ def main():
         level1_p2.append(winners2.count(1) * 5)
         level2_p2.append(winners2.count(2) * 5)
         tie_p2.append(winners2.count(999) * 5)
+    payoff_avg =[]
+    payoff_avg.append(sum(winners1)/len(winners1))
+    payoff_avg.append(sum(winners2)/len(winners2))
 
-    ind = np.arange(10)
+    ind = np.arange(2)
     # add tie
     print(ind)
     width = 0.8 / 4
-    plt.bar(ind, tie_p1, width, label='tie', color='k')
-    plt.bar(ind + width, level0_p1, width, label='level-0', color='green')
-    plt.bar(ind + 2 * width, level1_p1, width, label='level-1', color='purple')
-    plt.bar(ind + 3 * width, level2_p1, width, label='level-2', color='r')
+    plt.bar(ind, payoff_avg, width, label='tie', color='k')
+
 
     plt.xlabel(r'$\lambda_1$ & $\lambda_2$ parameter')
     plt.ylabel('Win%')
@@ -310,26 +302,18 @@ if __name__ == "__main__":
     level1_p2 = []
     level2_p2 = []
     tie_p2 = []
-    for j in range(10):
-        lamda = 0.5
+    for j in range(1):
+        lamda = 50
+        winners0 = []
         winners1 = []
         winners2 = []
-        n=j + 1
-        for i in range(20):
-            normal_form_game_player = normal_form_game_payoff(n)
+        for i in range(100000):
+            normal_form_game_player = normal_form_game_payoff(2)
             payoff1, payoff2 = game_simulation(lamda)
-            max1 = max(payoff1)
-            max2 = max(payoff2)
-            payoff_1set = set(payoff1)
-            payoff_2set = set(payoff2)
-            if len(payoff_1set) == 3:
-                winners1.append(payoff1.index(max1))
-            else:
-                winners1.append(999)
-            if len(payoff_2set) == 3:
-                winners2.append(payoff2.index(max2))
-            else:
-                winners2.append(999)
+            winners0.append(payoff1[0])
+            winners1.append(payoff1[1])
+            winners2.append(payoff1[2])
+
         level0_p1.append(winners1.count(0) * 5)
         level1_p1.append(winners1.count(1) * 5)
         level2_p1.append(winners1.count(2) * 5)
@@ -338,32 +322,25 @@ if __name__ == "__main__":
         level1_p2.append(winners2.count(1) * 5)
         level2_p2.append(winners2.count(2) * 5)
         tie_p2.append(winners2.count(999) * 5)
+    payoff_avg = []
+    payoff_avg.append(sum(winners0)/10000.0)
+    payoff_avg.append(sum(winners1) / 10000.0)
+    payoff_avg.append(sum(winners2) / 10000.0)
 
-    ind = np.arange(10)
+    ind = np.arange(3)
     # add tie
     print(ind)
     width = 0.8 / 4
-    plt.bar(ind, tie_p1, width, label='tie', color='k')
-    plt.bar(ind + width, level0_p1, width, label='level-0', color='green')
-    plt.bar(ind + 2 * width, level1_p1, width, label='level-1', color='purple')
-    plt.bar(ind + 3 * width, level2_p1, width, label='level-2', color='r')
+    plt.bar(ind, payoff_avg, width, label='payoff', color='k')
 
-    plt.xlabel(r'Game size (nxn)')
-    plt.ylabel('Win%')
-    plt.title(r'Win% for different game size(nxn) (Player 1)')
+    plt.xlabel(r'Levels')
+    plt.ylabel('Average Payoff')
+    plt.title(r'Average Payoff for Level 0 to 2')
     plt.grid()
-    plt.xticks(ind + width, ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10'))
     plt.text(2.8, 78, r'$\lambda_1$ = $\lambda_2$')
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper left')
     plt.show()
     print
     level_k_probabilities_1(1, 0)
-    print
+    print (payoff_avg)
     len(normal_form_game_payoff(3))
-
-
-
-
-
-
-

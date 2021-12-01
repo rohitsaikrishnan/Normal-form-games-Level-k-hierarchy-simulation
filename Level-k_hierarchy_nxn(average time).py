@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 import collections
 import functools
+import time
 np.random.seed(60)
 def normal_form_game_payoff(n):
     normal_form_game = []
@@ -18,7 +19,7 @@ def normal_form_game_payoff(n):
     return normal_form_game
 
 
-def level_k_probabilities_2(k,player,lamda=0.56, lamda2 = 0.05):
+def level_k_probabilities_1(k,player,lamda=0.56, lamda2 = 0.05):
     n=len(normal_form_game_player)
     if k == 0:
         probs=[]
@@ -26,12 +27,13 @@ def level_k_probabilities_2(k,player,lamda=0.56, lamda2 = 0.05):
             probs.append((1.0/n))
         probs=tuple(probs)
         return probs
+    lk_k = level_k_probabilities_1(k - 1, (player + 1) % 2, lamda, lamda2)
     if player == 0:
         sum_action=[]
         for i in range(n):
             temp_sum = 0
             for j in range(n):
-                temp_sum = temp_sum + level_k_probabilities_1(k-1, (player+1) % 2,lamda2)[j] * normal_form_game_player[i][j][0]
+                temp_sum = temp_sum + lk_k[j] * normal_form_game_player[i][j][0]
             temp_sum = np.exp(lamda * temp_sum)
             sum_action.append(temp_sum)
         probs=[]
@@ -45,7 +47,7 @@ def level_k_probabilities_2(k,player,lamda=0.56, lamda2 = 0.05):
         for i in range(n):
             temp_sum = 0
             for j in range(n):
-                temp_sum = temp_sum + level_k_probabilities_1(k - 1, (player + 1) % 2,lamda2)[j] * \
+                temp_sum = temp_sum + lk_k[j] * \
                            normal_form_game_player[j][i][1]
             temp_sum = np.exp(lamda * temp_sum)
             sum_action.append(temp_sum)
@@ -56,20 +58,22 @@ def level_k_probabilities_2(k,player,lamda=0.56, lamda2 = 0.05):
         probs = tuple(probs)
         return probs
 
-def level_k_probabilities_1(k,player,lamda=0.36):
+def level_k_probabilities_2(k,player,lamda=0.36):
     n=len(normal_form_game_player)
+
     if k == 0:
         probs=[]
         for i in range(n):
             probs.append((1.0/n))
         probs=tuple(probs)
         return probs
+    lk_k = level_k_probabilities_1(k - 1, (player + 1) % 2)
     if player == 0:
         sum_action=[]
         for i in range(n):
             temp_sum = 0
             for j in range(n):
-                temp_sum = temp_sum + level_k_probabilities_1(k-1, (player+1) % 2)[j] * normal_form_game_player[i][j][0]
+                temp_sum = temp_sum + lk_k[j] * normal_form_game_player[i][j][0]
             temp_sum = np.exp(lamda * temp_sum)
             sum_action.append(temp_sum)
         probs=[]
@@ -83,7 +87,7 @@ def level_k_probabilities_1(k,player,lamda=0.36):
         for i in range(n):
             temp_sum = 0
             for j in range(n):
-                temp_sum = temp_sum + level_k_probabilities_1(k - 1, (player + 1) % 2)[j] * \
+                temp_sum = temp_sum + lk_k[j] * \
                            normal_form_game_player[j][i][1]
             temp_sum = np.exp(lamda * temp_sum)
             sum_action.append(temp_sum)
@@ -93,26 +97,25 @@ def level_k_probabilities_1(k,player,lamda=0.36):
             probs.append(temp_prob)
         probs = tuple(probs)
         return probs
-def poisson_distribution(lamda=1.5, no_of_levels=2):
+def poisson_distribution(lamda=1.5, no_of_levels=100):
     probabilistic_distribution=[]
     for i in range(no_of_levels+1):
         probabilistic_distribution.append(np.power(lamda, i)*np.exp(-lamda)/float(math.factorial(i)))
     probabilistic_distribution = [i/sum(probabilistic_distribution) for i in probabilistic_distribution]
     return probabilistic_distribution
-def level_0_payoff(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2,lk_probabilities_p):
+def level_k_payoff(level, total_levels, lamda):
     n=len(normal_form_game_player)
-    player_probabilities = lk_probabilities_p
-    level_0_probabilities = lk_probabilities_0
-    level_1_probabilities = lk_probabilities_1
-    level_2_probabilities = lk_probabilities_2
+    player_probabilities = level_k_probabilities_1(level,0,lamda,lamda)
+    level_k_probabilities = []
+    for l in range(total_levels):
+        level_k_probabilities.append(level_k_probabilities_1(l,0,lamda,lamda))
     player_distribution = poisson_distribution()
     payoff = 0
     for i in range(n):
         for j in range(n):
-            #Checked
-            payoff = payoff + player_probabilities[i] * normal_form_game_player[i][j][0] * (
-                        level_0_probabilities[j] * player_distribution[0] + level_1_probabilities[j] *
-                        player_distribution[1] + level_2_probabilities[j] * player_distribution[2])
+            for l in range(total_levels):#Checked
+                payoff = payoff + player_probabilities[i] * normal_form_game_player[i][j][0] * (
+                        level_k_probabilities[l][j] * player_distribution[l] )
     return payoff
 def level_1_payoff(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2, lk_probabilities_p):
     n=len(normal_form_game_player)
@@ -209,10 +212,10 @@ def game_simulation(lamda):
     n = len(normal_form_game_player)
     lk_probabilities_0p1 = level_k_probabilities_1(0, 0)
     lk_probabilities_1p1 = level_k_probabilities_1(1, 0,lamda)
-    lk_probabilities_2p1 = level_k_probabilities_2(2, 0,lamda, lamda)
+    lk_probabilities_2p1 = level_k_probabilities_1(2, 0,lamda, lamda)
     lk_probabilities_0p2 = level_k_probabilities_1(0, 1)
     lk_probabilities_1p2 = level_k_probabilities_1(1, 1, lamda)
-    lk_probabilities_2p2 = level_k_probabilities_2(2, 1, lamda, lamda)
+    lk_probabilities_2p2 = level_k_probabilities_1(2, 1, lamda, lamda)
     probabilistic_distribution = [0,0,1]
     print ('\n\n')
     print ('Game', i)
@@ -224,10 +227,9 @@ def game_simulation(lamda):
     print ('Level-0 -->', lk_probabilities_0p1)
     print ('Level-1 -->', lk_probabilities_1p1)
     print ('Level-2 -->',lk_probabilities_2p1)
-    payoff_10 = level_0_payoff(lk_probabilities_0p2, lk_probabilities_1p2, lk_probabilities_2p2, lk_probabilities_0p1)
-    payoff_11 = level_1_payoff(lk_probabilities_0p2, lk_probabilities_1p2, lk_probabilities_2p2, lk_probabilities_1p1)
-    payoff_12 = level_2_payoff(lk_probabilities_0p2, lk_probabilities_1p2, lk_probabilities_2p2, lk_probabilities_2p1)
-    payoff_1 = [payoff_10, payoff_11, payoff_12]
+    payoff_1 = []
+    for l in range(100):
+        payoff_1.append(level_k_payoff(l,100,lamda))
     print ('Avg. Payoff -->',payoff_1)
     print ('Player 2')
     print ('Level-0 -->', lk_probabilities_0p2)
@@ -313,36 +315,28 @@ if __name__ == "__main__":
     level2_p2 = []
     tie_p2 = []
     winner_level1_proportion = []
-    for j in range(10):
+    avg_time1 = []
+    avg_time2 = []
+    total_time = [0 for i in range(100)]
+    for j in range(1):
+        total_time1=0
+        total_time2=0
         lamda = 0.5
         winners1 = []
         winners2 = []
         winner_level1 = 0
         n=j + 1
         for i in range(100):
-            normal_form_game_player = normal_form_game_payoff(n)
-            payoff1, payoff2 = game_simulation(lamda)
-            max1 = max(payoff1)
-            max2 = max(payoff2)
-            payoff_1set = set(payoff1)
-            payoff_2set = set(payoff2)
-            if len(payoff_1set) == 3:
-                if payoff1.index(max1) == 1:
-                    index_1=np.argsort(np.array(level_k_probabilities_1(1, 0, lamda)))
-                    index_2=np.argsort(np.array(level_k_probabilities_2(2,0,lamda,lamda)))
-                    if index_1[n-1]!=index_2[n-1]:
-                        winner_level1 = winner_level1 + 1
+            normal_form_game_player = normal_form_game_payoff(5)
+            for l in range(100):
+                start_time1=time.time()
+                level_k_probabilities_1(l,0,lamda, lamda)
+                time_taken1 = time.time() - start_time1
+                total_time[l] = total_time[l] + time_taken1
 
-                winners1.append(payoff1.index(max1))
-            else:
-                winners1.append(999)
-            if len(payoff_2set) == 3:
-                winners2.append(payoff2.index(max2))
-            else:
-                winners2.append(999)
 
-        if j!=0:
-            winner_level1_proportion.append(((float(winner_level1)/winners1.count(1)))*100)
+
+        avg_time = [total_time[l]/100 for l in range(100)]
         level0_p1.append(winners1.count(0))
         level1_p1.append(winners1.count(1))
         level2_p1.append(winners1.count(2))
@@ -352,23 +346,20 @@ if __name__ == "__main__":
         level2_p2.append(winners2.count(2))
         tie_p2.append(winners2.count(999))
 
-    ind = np.arange(9)
+    ind = np.arange(100)
     # add tie
     print(ind)
     width = 0.8 / 2
-    plt.bar(ind, winner_level1_proportion, width, label='Win due to reason 2', color='purple')
-    plt.bar(ind + width, level1_p1[1:],width, label='Level-1 winning',color='red')
-    plt.xlabel(r'Game size (nxn)')
-    plt.ylabel('Win%')
-    plt.title(r'Win% for different game size(nxn) (Row)')
+    plt.bar(ind, avg_time, width, label='Level-1 Average Time', color='purple')
+    plt.xlabel(r'Level')
+    plt.ylabel('Time')
+    plt.title(r'Average Time for different level (Row)')
     plt.grid()
-    plt.xticks(ind, ('2', '3', '4', '5', '6', '7', '8', '9', '10'))
     plt.text(2.8, 78, r'$\lambda_1$ = $\lambda_2$ = 0.5')
     plt.legend(loc='upper left')
     plt.show()
     print level_k_probabilities_1(1, 0)
-    print
-    len(normal_form_game_payoff(3))
+    print len(normal_form_game_payoff(3))
 
 
 

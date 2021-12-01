@@ -228,13 +228,13 @@ def level_2_payoff_2(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2, l
 #    print(payoff)
 #    print(payoff2)
 print poisson_distribution()
-def game_simulation(lamda,lamda2):
+def game_simulation(lamda,lamda2,i):
     lk_probabilities_0p1 = level_k_probabilities_1(0, 0)
     lk_probabilities_1p1 = level_k_probabilities_1(1, 0,lamda)
-    lk_probabilities_2p1 = level_k_probabilities_2(2, 0,lamda2, lamda)
+    lk_probabilities_2p1 = level_k_probabilities_2(2, 0,lamda, lamda)
     lk_probabilities_0p2 = level_k_probabilities_1(0, 1)
     lk_probabilities_1p2 = level_k_probabilities_1(1, 1, lamda)
-    lk_probabilities_2p2 = level_k_probabilities_2(2, 1, lamda, lamda)
+    lk_probabilities_2p2 = level_k_probabilities_2(2, 1, lamda2, lamda)
     probabilistic_distribution = poisson_distribution()
     print ('\n\n')
     print ('Game', i)
@@ -285,10 +285,10 @@ def lamda1_vs_lamda2(lamda):
         global normal_form_game_player
         normal_form_game_player = normal_form_game_player_list[i]
         while 1:
-            payoff1, payoff2 = game_simulation(lamda, lamda2)
+            payoff1, payoff2 = game_simulation(lamda, lamda2,i)
             max1 = max(payoff1)
             max2 = max(payoff2)
-            if payoff1.index(max1) == 2:
+            if payoff2.index(max2) == 2:
                 lamda2_values.append(lamda2)
                 break
             lamda2 = lamda2 + 0.01
@@ -308,13 +308,17 @@ print(ind)
 plt.plot(ind, lamda1_vs_lamda2_values[0], color='b', label=r'$\lambda_1$ = 0.1')
 plt.plot(ind, lamda1_vs_lamda2_values[1], color='r', label=r'$\lambda_1$ = 0.2')
 plt.plot(ind, lamda1_vs_lamda2_values[2], label=r'$\lambda_1$ = 0.3')
+print ((lamda1_vs_lamda2_values[0][19]))
+print ([x for x in range(len(lamda1_vs_lamda2_values[0])) if lamda1_vs_lamda2_values[0][x]>0.105])
+print ([x for x in range(len(lamda1_vs_lamda2_values[1])) if lamda1_vs_lamda2_values[1][x] > 0.205])
+print ([x for x in range(len(lamda1_vs_lamda2_values[2])) if lamda1_vs_lamda2_values[2][x] > 0.305])
 plt.axhline(y=0.1, color = 'brown')
 plt.axhline(y=0.2, color = 'brown')
 plt.axhline(y=0.3, color = 'brown')
 plt.xlabel('Game No.')
 plt.ylabel(r'$\lambda_2$ parameter')
 plt.legend()
-plt.title('optimal $\lambda$ for level-2')
+plt.title('optimal $\lambda$ for level-2 (Player-2)')
 plt.text(3, 0.31, r'$\lambda_2$=0.3')
 plt.text(6, 0.21, r'$\lambda_2$=0.2')
 plt.text(10.8, 0.11, r'$\lambda_2$=0.1')

@@ -6,15 +6,15 @@ import math
 np.random.seed(5)
 def normal_form_game_payoff():
 
-    num=np.random.randint(1,11)
-    num1=np.random.randint(1,11)
-    num2=np.random.randint(1,11)
-    num3 = np.random.randint(1, 11)
-    num4 = np.random.randint(1, 11)
-    num5 = np.random.randint(1, 11)
-    num6 = np.random.randint(1, 11)
-    num7 = np.random.randint(1, 11)
-    normal_form_game = [[[2,5],[8,9]],[[20,7],[3,8]]]
+    num=np.random.rand()
+    num1=np.random.rand()          #2  1....2   1
+    num2=np.random.rand()
+    num3 = np.random.rand()
+    num4 = np.random.rand()
+    num5 = np.random.rand()
+    num6 = np.random.rand()
+    num7 = np.random.rand()
+    normal_form_game = [[[num,num1],[num2,num3]],[[num4,num5],[num6,num7]]]
     return normal_form_game
 
 
@@ -65,7 +65,7 @@ def poisson_distribution(lamda=1.5, no_of_levels=2):
     for i in range(no_of_levels+1):
         probabilistic_distribution.append(np.power(lamda, i)*np.exp(-lamda)/float(math.factorial(i)))
     probabilistic_distribution = [i/sum(probabilistic_distribution) for i in probabilistic_distribution]
-    return probabilistic_distribution
+    return [0,1,0]
 def level_0_payoff(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2,lk_probabilities_p):
     player_probabilities=lk_probabilities_p
     level_0_probabilities=lk_probabilities_0
@@ -172,10 +172,10 @@ def level_2_payoff_2(lk_probabilities_0,lk_probabilities_1,lk_probabilities_2,lk
 #    print(payoff)
 #    print(payoff2)
 print poisson_distribution()
-def game_simulation(lamda):
+def game_simulation(lamda, lamda2, i):
     lk_probabilities_0p1 = level_k_probabilities_1(0, 0)
     lk_probabilities_1p1 = level_k_probabilities_1(1, 0, lamda)
-    lk_probabilities_2p1 = level_k_probabilities_2(2, 0, lamda, lamda)
+    lk_probabilities_2p1 = level_k_probabilities_2(2, 0, lamda2, lamda)
     lk_probabilities_0p2 = level_k_probabilities_1(0, 1)
     lk_probabilities_1p2 = level_k_probabilities_1(1, 1, lamda)
     lk_probabilities_2p2 = level_k_probabilities_2(2, 1, lamda, lamda)
@@ -211,54 +211,62 @@ def game_simulation(lamda):
 level0_p1 = []
 level1_p1 = []
 level2_p1 = []
-tie_p1 = []
+tie_p1=[]
 level0_p2 = []
 level1_p2 = []
 level2_p2 = []
-tie_p2 = []
-for j in range(10):
-    lamda = (j+1)*0.2
-    winners1 = []
-    winners2 = []
-    for i in range(1):
-        normal_form_game_player = normal_form_game_payoff()
-        payoff1, payoff2 = game_simulation(lamda)
-        max1 = max(payoff1)
-        max2 = max(payoff2)
-        payoff_1set=set(payoff1)
-        payoff_2set=set(payoff2)
-        if len(payoff_1set)==3:
-            winners1.append(payoff1.index(max1))
-        else:
-            winners1.append(999)
-        if len(payoff_2set)==3:
-            winners2.append(payoff2.index(max2))
-        else:
-            winners2.append(999)
-    level0_p1.append(winners1.count(0)*5)
-    level1_p1.append(winners1.count(1)*5)
-    level2_p1.append(winners1.count(2)*5)
-    tie_p1.append(winners1.count(999)*5)
-    level0_p2.append(winners2.count(0)*5)
-    level1_p2.append(winners2.count(1)*5)
-    level2_p2.append(winners2.count(2)*5)
-    tie_p2.append((winners2.count(999)*5))
-#add tie
-ind = np.arange(10)
-print(ind)
-width = 0.8/4
-plt.bar(ind, tie_p1, width, label='tie',color='k')
-plt.bar(ind+width, level0_p1, width, label='level-0',color='green')
-plt.bar(ind + 2*width, level1_p1, width,label='level-1',color='purple')
-plt.bar(ind+3*width, level2_p1, width, label='level-2',color='r')
+tie_p2=[]
 
-plt.xlabel(r'$\lambda_1$ & $\lambda_2$ parameter')
-plt.ylabel('Win%')
-plt.title(r'Win% for different values of $\lambda_1$ & $\lambda_2$(Player 1)')
+normal_form_game_player = []
+normal_form_game_player_list = []
+for i in range(20):
+    normal_form_game_player_list.append(normal_form_game_payoff())
+def lamda1_vs_lamda2(lamda):
+    lamda2_values = []
+    for i in range(20):
+        lamda2 = 0
+        global normal_form_game_player
+        normal_form_game_player = normal_form_game_player_list[i]
+        while 1:
+            payoff1, payoff2 = game_simulation(lamda, lamda2,i)
+            max1 = max(payoff1)
+            max2 = max(payoff2)
+            if payoff1.index(max1) == 2:
+                lamda2_values.append(lamda2)
+                break
+            lamda2 = lamda2 + 0.01
+    return lamda2_values
+
+
+
+ind = []
+for i in range(20):
+    ind.append(str(i+1))
+lamda1_vs_lamda2_values=[]
+for i in range(3):
+    lamda = (i+1) * 0.1
+    lamda1_vs_lamda2_values.append(lamda1_vs_lamda2(lamda))
+#add tie
+print(ind)
+plt.plot(ind, lamda1_vs_lamda2_values[0], color='b', label=r'$\lambda_1$ = 0.1')
+plt.plot(ind, lamda1_vs_lamda2_values[1], color='r', label=r'$\lambda_1$ = 0.2')
+plt.plot(ind, lamda1_vs_lamda2_values[2], label=r'$\lambda_1$ = 0.3')
+print ((lamda1_vs_lamda2_values[0][19]))
+print ([x for x in range(len(lamda1_vs_lamda2_values[0])) if lamda1_vs_lamda2_values[0][x]>0.105])
+print ([x for x in range(len(lamda1_vs_lamda2_values[1])) if lamda1_vs_lamda2_values[1][x] > 0.205])
+print ([x for x in range(len(lamda1_vs_lamda2_values[2])) if lamda1_vs_lamda2_values[2][x] > 0.305])
+plt.axhline(y=0.1, color = 'brown')
+plt.axhline(y=0.2, color = 'brown')
+plt.axhline(y=0.3, color = 'brown')
+plt.xlabel('Game No.')
+plt.ylabel(r'$\lambda_2$ parameter')
+plt.legend()
+plt.title('optimal $\lambda$ for level-2 (Player-2)')
+plt.text(3, 0.31, r'$\lambda_2$=0.3')
+plt.text(6, 0.21, r'$\lambda_2$=0.2')
+plt.text(10.8, 0.11, r'$\lambda_2$=0.1')
+plt.autoscale()
 plt.grid()
-plt.xticks(ind + width, ('0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9','1.0'))
-plt.text(4, 55, r'$\lambda_1$=$\lambda_2$')
-plt.legend(loc='upper right')
 plt.show()
 
 
